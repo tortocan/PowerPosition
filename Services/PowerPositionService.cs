@@ -2,7 +2,7 @@
 
 namespace PowerPosition.Services
 {
-	public class PowerPositionService : ICsvParserService<PowerPositionModel>
+	public class PowerPositionService : ICsvParserService<PowerPositionModel>, IPowerPositionService
 	{
 		private readonly ICsvParserService<PowerPositionModel> csvParserService;
 
@@ -21,7 +21,7 @@ namespace PowerPosition.Services
 			var fileInfo = new FileInfo(path);
 			var date = DateTime.Now;
 			var fileName = fileInfo.Name.Replace(fileInfo.Extension, string.Empty);
-			var filePath = Path.Combine(fileInfo.DirectoryName, $"{fileName}_{date.ToString("yyyymmdd")}_{date.ToString("HHmm")}.{fileInfo.Extension}");
+			var filePath = Path.Combine(fileInfo.DirectoryName ?? string.Empty, $"{fileName}_{date:yyyymmdd}_{date:HHmm}{fileInfo.Extension}");
 			return csvParserService.WriteFile(filePath, values);
 		}
 	}

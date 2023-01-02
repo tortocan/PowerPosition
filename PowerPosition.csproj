@@ -25,6 +25,11 @@
 	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
 	  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
 	  <Resource Include="appsettings.json">
 		  <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

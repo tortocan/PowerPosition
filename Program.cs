@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.Configuration;
-using PowerPosition.Models;
+using Microsoft.Extensions.DependencyInjection;
+using PowerPosition;
 using PowerPosition.Services;
 
 var configuration = new ConfigurationBuilder()
@@ -9,13 +10,12 @@ var configuration = new ConfigurationBuilder()
 			  .AddEnvironmentVariables(prefix: "CRON_")
 			  .Build();
 
-var consoleSettings = new ConsoleSettings();
-configuration.GetSection(nameof(ConsoleSettings)).Bind(consoleSettings);
+var serviceCollection = new ServiceCollection();
+serviceCollection.AddOptions<PowerPositionOptions>().Bind(configuration.GetSection(nameof(PowerPositionOptions)));
+serviceCollection.AddScoped(typeof(ICsvParserService<>), typeof(CsvParserService<>));
+serviceCollection.AddScoped<IPowerPositionService, PowerPositionService>();
+serviceCollection.AddTransient<App>();
 
-Console.WriteLine($"{DateTime.UtcNow}: Output String: '{consoleSettings.OutputString}'");
-var csvService = new PowerPositionService(new CsvParserService<PowerPositionModel>());
-var path = csvService.WriteFile(consoleSettings.OutputString, new List<PowerPositionModel>() { new PowerPositionModel { LocalTime = DateTime.Now.ToLocalTime(), Volume = 100 } });
+var serviceProvider = serviceCollection.BuildServiceProvider();
 
-var file = csvService.ReadFile(path);
-
-file.ToList().ForEach(x => Console.WriteLine(x.LocalTime));
+serviceProvider.GetService<App>().Run(args);
