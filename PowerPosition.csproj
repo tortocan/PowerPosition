@@ -30,6 +30,9 @@
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+	  <Reference Include="PowerService">
+	    <HintPath>PowerService.dll</HintPath>
+	  </Reference>
 	  <Resource Include="appsettings.json">
 		  <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

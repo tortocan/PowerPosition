@@ -1,32 +1,40 @@
 ﻿using Microsoft.Extensions.Options;
 using PowerPosition.Models;
 using PowerPosition.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerPosition
 {
 	public class App
 	{
-		private readonly IPowerPositionService csvService;
+		private readonly IPowerPositionService powerPositionService;
 		private readonly IOptions<PowerPositionOptions> powerPositionOptions;
 
-		public App(IPowerPositionService csvService, IOptions<PowerPositionOptions> powerPositionOptions)
+		public App(IPowerPositionService powerPositionService, IOptions<PowerPositionOptions> powerPositionOptions)
 		{
-			this.csvService = csvService;
+			this.powerPositionService = powerPositionService;
 			this.powerPositionOptions = powerPositionOptions;
+			this.powerPositionService.SetDelimiter(powerPositionOptions.Value.CsvDelimiter);
 		}
 
 		public int Run(string[] args)
 		{
 			Console.WriteLine($"{DateTime.UtcNow}: Output String: '{powerPositionOptions.Value.CsvOutputPath}'");
 
-			var path = csvService.WriteFile(powerPositionOptions.Value.CsvOutputPath, new List<PowerPositionModel>() { new PowerPositionModel { LocalTime = DateTime.Now.ToLocalTime(), Volume = 100 } });
+			var trades = powerPositionService.GetTrades();
+			var values = new List<PowerPositionModel>();
 
-			var file = csvService.ReadFile(path);
+			var groupedTradePeriods = trades.SelectMany(x => x.Periods).GroupBy(x => x.Period);
+
+			foreach (var item in groupedTradePeriods)
+			{
+				//The PowerTrade class contains an array of PowerPeriods for the given day. The period number starts at 1, which is the first period of the day and starts at 23:00 (11 pm) on the previous day
+				var localDate = new DateTime().AddHours(22).AddHours(item.First().Period);
+				var volume = Math.Round(item.Sum(x => x.Volume), 2);
+				values.Add(new PowerPositionModel { LocalTime = localDate, Volume = volume });
+			}
+			var path = powerPositionService.WriteFile(powerPositionOptions.Value.CsvOutputPath, values);
+
+			var file = powerPositionService.ReadFile(path);
 
 			file.ToList().ForEach(x => Console.WriteLine(x.LocalTime));
 			return 0;

@@ -5,5 +5,7 @@
 		IEnumerable<T> ReadFile(string path);
 
 		string WriteFile(string path, IEnumerable<T> values);
+
+		void SetDelimiter(string delimiter);
 	}
 }

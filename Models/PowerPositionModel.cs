@@ -9,6 +9,6 @@ namespace PowerPosition.Models
 		public DateTime LocalTime { get; set; }
 
 		[Name("Volume")]
-		public int Volume { get; set; }
+		public double Volume { get; set; }
 	}
 }

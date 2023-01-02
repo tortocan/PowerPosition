@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using Axpo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PowerPosition;
@@ -11,6 +12,7 @@ var configuration = new ConfigurationBuilder()
 			  .Build();
 
 var serviceCollection = new ServiceCollection();
+serviceCollection.AddScoped<IPowerService, PowerService>();
 serviceCollection.AddOptions<PowerPositionOptions>().Bind(configuration.GetSection(nameof(PowerPositionOptions)));
 serviceCollection.AddScoped(typeof(ICsvParserService<>), typeof(CsvParserService<>));
 serviceCollection.AddScoped<IPowerPositionService, PowerPositionService>();
