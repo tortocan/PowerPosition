@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using CommandLine;
+using Microsoft.Extensions.Options;
 using PowerPosition.Models;
 using PowerPosition.Services;
 
@@ -18,9 +19,22 @@ namespace PowerPosition
 
 		public int Run(string[] args)
 		{
-			Console.WriteLine($"{DateTime.UtcNow}: Output String: '{powerPositionOptions.Value.CsvOutputPath}'");
+			var csvOutputPath = powerPositionOptions.Value.CsvOutputPath;
+			Parser.Default.ParseArguments<PowerPositionOptions>(args)
+				   .WithParsed(o =>
+				   {
+					   if (!string.IsNullOrWhiteSpace(o.CsvDelimiter))
+					   {
+						   powerPositionService.SetDelimiter(o.CsvDelimiter);
+					   }
+					   if (!string.IsNullOrWhiteSpace(o.CsvOutputPath))
+					   {
+						   csvOutputPath = o.CsvOutputPath;
+					   }
+				   });
 
 			var trades = powerPositionService.GetTrades();
+
 			var values = new List<PowerPositionModel>();
 
 			var groupedTradePeriods = trades.SelectMany(x => x.Periods).GroupBy(x => x.Period);
@@ -32,7 +46,7 @@ namespace PowerPosition
 				var volume = Math.Round(item.Sum(x => x.Volume), 2);
 				values.Add(new PowerPositionModel { LocalTime = localDate, Volume = volume });
 			}
-			var path = powerPositionService.WriteFile(powerPositionOptions.Value.CsvOutputPath, values);
+			var path = powerPositionService.WriteFile(csvOutputPath, values);
 
 			var file = powerPositionService.ReadFile(path);
 
