@@ -2,6 +2,7 @@
 using Axpo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PowerPosition;
 using PowerPosition.Services;
 
@@ -11,13 +12,14 @@ var configuration = new ConfigurationBuilder()
 			  .AddEnvironmentVariables(prefix: "CRON_")
 			  .Build();
 
-var serviceCollection = new ServiceCollection();
-serviceCollection.AddScoped<IPowerService, PowerService>();
-serviceCollection.AddOptions<PowerPositionOptions>().Bind(configuration.GetSection(nameof(PowerPositionOptions)));
-serviceCollection.AddScoped(typeof(ICsvParserService<>), typeof(CsvParserService<>));
-serviceCollection.AddScoped<IPowerPositionService, PowerPositionService>();
-serviceCollection.AddTransient<App>();
+var services = new ServiceCollection();
+services.AddScoped<IPowerService, PowerService>();
+services.AddOptions<PowerPositionOptions>().Bind(configuration.GetSection(nameof(PowerPositionOptions)));
+services.AddScoped(typeof(ICsvParserService<>), typeof(CsvParserService<>));
+services.AddScoped<IPowerPositionService, PowerPositionService>();
+services.AddLogging(x => x.AddConsole());
+services.AddTransient<App>();
 
-var serviceProvider = serviceCollection.BuildServiceProvider();
+var serviceProvider = services.BuildServiceProvider();
 
 serviceProvider.GetService<App>().Run(args);
