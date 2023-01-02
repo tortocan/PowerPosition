@@ -17,13 +17,13 @@ namespace PowerPosition
 			this.powerPositionService = powerPositionService;
 			this.powerPositionOptions = powerPositionOptions;
 			this.logger = logger;
-			this.powerPositionService.SetDelimiter(powerPositionOptions.Value.CsvDelimiter);
 		}
 
 		public int Run(string[] args)
 		{
 			try
 			{
+				logger.LogInformation("App started running...");
 				var csvOutputPath = powerPositionOptions.Value.CsvOutputPath;
 				Parser.Default.ParseArguments<PowerPositionOptions>(args)
 					   .WithParsed(o =>
@@ -32,8 +32,13 @@ namespace PowerPosition
 						   {
 							   powerPositionService.SetDelimiter(o.CsvDelimiter);
 						   }
+						   else
+						   {
+							   powerPositionService.SetDelimiter(powerPositionOptions.Value.CsvDelimiter);
+						   }
 						   if (!string.IsNullOrWhiteSpace(o.CsvOutputPath))
 						   {
+							   logger.LogDebug("Setting csv output file from args");
 							   csvOutputPath = o.CsvOutputPath;
 						   }
 					   });
@@ -43,19 +48,30 @@ namespace PowerPosition
 				var values = new List<PowerPositionModel>();
 
 				var groupedTradePeriods = trades.SelectMany(x => x.Periods).GroupBy(x => x.Period);
+				logger.LogInformation($"Total grouped trade periods are ({groupedTradePeriods.Count()})");
 
 				foreach (var item in groupedTradePeriods)
 				{
 					//The PowerTrade class contains an array of PowerPeriods for the given day. The period number starts at 1, which is the first period of the day and starts at 23:00 (11 pm) on the previous day
-					var localDate = new DateTime().AddHours(22).AddHours(item.First().Period);
-					var volume = Math.Round(item.Sum(x => x.Volume), 2);
-					values.Add(new PowerPositionModel { LocalTime = localDate, Volume = volume });
+					if (item.Any())
+					{
+						var localDate = new DateTime().AddHours(22).AddHours(item.First().Period);
+						logger.LogInformation($"Found a total of ({item.Count()}) periods");
+						var volume = Math.Round(item.Sum(x => x.Volume), 2);
+						logger.LogInformation($"Adding new value with LocalTime {localDate.TimeOfDay} and Volume {volume}");
+						values.Add(new PowerPositionModel { LocalTime = localDate, Volume = volume });
+					}
+					else
+					{
+						logger.LogWarning("Item has no periods !");
+					}
 				}
 				var path = powerPositionService.WriteFile(csvOutputPath, values);
 
 				var file = powerPositionService.ReadFile(path);
 
-				file.ToList().ForEach(x => Console.WriteLine(x.LocalTime));
+				file.ToList().ForEach(x => logger.LogDebug($"{x.LocalTime} {x.Volume}"));
+				logger.LogInformation("App finished succesfully");
 			}
 			catch (Exception ex)
 			{

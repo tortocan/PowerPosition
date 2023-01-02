@@ -4,4 +4,4 @@
 source /app/set_env.sh;
 
 # Run your dotnet console app
-dotnet /app/PowerPosition.dll
+dotnet /app/PowerPosition.dll csv
