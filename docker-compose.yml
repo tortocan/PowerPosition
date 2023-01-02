@@ -4,7 +4,12 @@ services:
   powerposition:
     image: ${DOCKER_REGISTRY-}powerposition
     environment:
-      - CRON_ConsoleSettings__OutputString=NewTestString
+      - CRON_ConsoleSettings__OutputString=/app/output/file.csv
+    volumes:
+      - powerposition:/app/output
     build:
       context: .
       dockerfile: Dockerfile
+volumes:
+  powerposition:
+    external: true
