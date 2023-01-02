@@ -13,9 +13,9 @@ var consoleSettings = new ConsoleSettings();
 configuration.GetSection(nameof(ConsoleSettings)).Bind(consoleSettings);
 
 Console.WriteLine($"{DateTime.UtcNow}: Output String: '{consoleSettings.OutputString}'");
-var csvService = new CsvParserService<PowerPositionModel>();
-csvService.WriteFile(consoleSettings.OutputString, new List<PowerPositionModel>() { new PowerPositionModel { LocalTime = DateTime.Now.ToLocalTime(), Volume = 100 } });
+var csvService = new PowerPositionService(new CsvParserService<PowerPositionModel>());
+var path = csvService.WriteFile(consoleSettings.OutputString, new List<PowerPositionModel>() { new PowerPositionModel { LocalTime = DateTime.Now.ToLocalTime(), Volume = 100 } });
 
-var file = csvService.ReadFile(consoleSettings.OutputString);
+var file = csvService.ReadFile(path);
 
 file.ToList().ForEach(x => Console.WriteLine(x.LocalTime));

@@ -6,7 +6,7 @@ namespace PowerPosition.Services
 {
 	public class CsvParserService<T> : ICsvParserService<T> where T : class
 	{
-		public void WriteFile(string path, IEnumerable<T> values)
+		public string WriteFile(string path, IEnumerable<T> values)
 		{
 			using StreamWriter sw = new(path, false, new UTF8Encoding(true));
 			using CsvWriter cw = new(sw, CultureInfo.InvariantCulture);
@@ -17,6 +17,7 @@ namespace PowerPosition.Services
 				cw.WriteRecord(emp);
 				cw.NextRecord();
 			}
+			return path;
 		}
 
 		public IEnumerable<T> ReadFile(string path)
